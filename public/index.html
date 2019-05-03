@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="container">
+    <div id="result">
+      <canvas id="glcanvas" width="640" height="480">
+        このブラウザは<code>&lt;canvas&gt;</code>要素をサポートしていません。
+      </canvas>
+      <div id="variables">aaaa</div>
+    </div>
+    <div id="editors">
+      <div id="vs-editor" class="editor">
+
+        <head>VertexShader</head>
+        <textarea id="vshader-source"></textarea>
+      </div>
+      <div id="fs-editor" class="editor">
+
+        <head>FragmentShader</head>
+        <textarea id="fshader-source"></textarea>
+      </div>
+    </div>
+    <div id="buttons">
+      <button id="run-button">RUN</button>
+    </div>
+  </div>
+  <script src="./js/bundle.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    margin: 0, auto;
+    position: relative;
+    font-size: 100%;
+}
+
+html, body {
+    background-color: greenyellow;
+    height: 100%;
+    overflow: hidden;
+}
+
+textarea {
+    resize: none;
+    width: 100%;
+    height: 100%;
+}
+
+button {
+    font-size: 3rem;
+}
+
+#container {
+    background-color: #777777;
+    width: auto;
+    height: 100%;
+    margin: 0, 0, 0, 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#result {
+    background-color: cyan;
+    display: flex;
+    flex-direction: row;
+}
+
+#variables {
+    background-color: pink;
+}
+
+#editors {
+    width: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    width: 33%;
+    height: 100%;
+    background-color: violet;
+}
