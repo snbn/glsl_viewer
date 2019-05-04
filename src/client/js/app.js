@@ -3,6 +3,27 @@ import "../css/app.css";
 
 var { mat4 } = require("gl-matrix");
 
+const glTypeName = [
+    'FLOAT',
+    'FLOAT_VEC2',
+    'FLOAT_VEC3',
+    'FLOAT_VEC4',
+    'INT',
+    'INT_VEC2',
+    'INT_VEC3',
+    'INT_VEC4',
+    'BOOL',
+    'BOOL_VEC2',
+    'BOOL_VEC3',
+    'BOOL_VEC4',
+    'FLOAT_MAT2',
+    'FLOAT_MAT3',
+    'FLOAT_MAT4',
+    'SAMPLER_2D',
+    'SAMPLER_CUBE'
+];
+
+
 const vshaderSkelton = `
 attribute vec4 aVertexPosition;
 attribute vec4 aVertexColor;
@@ -85,6 +106,12 @@ function load() {
         alert('Unable to initialize WebGL. Your browser or machine may not support it.');
         return;
     }
+    const glIntToTypeName = {};
+    glTypeName.forEach(function (typeName) {
+        glIntToTypeName[gl[typeName]] = typeName;
+    });
+    console.log(glIntToTypeName);
+
 
     var vsSource = shaderSourceFromEditor("vshader-source");
     var fsSource = shaderSourceFromEditor("fshader-source");
@@ -122,7 +149,7 @@ function load() {
         itemElm.appendChild(valueElm);
 
         nameElm.textContent = `${v.name} :`;
-        typeElm.textContent = v.type;
+        typeElm.textContent = glIntToTypeName[v.type];
         valueElm.textContent = 0;
     });
     document.getElementById('variables').appendChild(uniformList);
