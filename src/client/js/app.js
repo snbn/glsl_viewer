@@ -67,6 +67,10 @@ function clean() {
         gl.deleteBuffer(b);
     });
     gl.deleteProgram(state.shaderInfo.program);
+
+    const variablesElement = document.getElementById('variables');
+    variablesElement.removeChild(variablesElement.firstChild);
+
     state.renderLoopId += 1;
 }
 
@@ -98,6 +102,30 @@ function load() {
             modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
         },
     };
+
+    const uni_num = gl.getProgramParameter(shaderProgram, gl.ACTIVE_UNIFORMS);
+    const uni_info = [];
+    for (let i = 0; i < uni_num; i++) {
+        const info = gl.getActiveUniform(shaderProgram, i);
+        uni_info.push(info);
+    }
+
+    const uniformList = document.createElement('ol');
+    uni_info.forEach(function (v) {
+        const itemElm = document.createElement('li');
+        const nameElm = document.createElement('div');
+        const typeElm = document.createElement('div');
+        const valueElm = document.createElement('div');
+        uniformList.appendChild(itemElm);
+        itemElm.appendChild(nameElm);
+        itemElm.appendChild(typeElm);
+        itemElm.appendChild(valueElm);
+
+        nameElm.textContent = `${v.name} :`;
+        typeElm.textContent = v.type;
+        valueElm.textContent = 0;
+    });
+    document.getElementById('variables').appendChild(uniformList);
 
     const buffers = initBuffers(gl);
 
