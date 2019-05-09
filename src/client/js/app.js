@@ -1,27 +1,8 @@
 import "normalize.css";
 import "../css/app.css";
+import { GLWrapper } from "./gl_helper.js";
 
 const { mat4 } = require("gl-matrix");
-
-const glTypeName = [
-    'FLOAT',
-    'FLOAT_VEC2',
-    'FLOAT_VEC3',
-    'FLOAT_VEC4',
-    'INT',
-    'INT_VEC2',
-    'INT_VEC3',
-    'INT_VEC4',
-    'BOOL',
-    'BOOL_VEC2',
-    'BOOL_VEC3',
-    'BOOL_VEC4',
-    'FLOAT_MAT2',
-    'FLOAT_MAT3',
-    'FLOAT_MAT4',
-    'SAMPLER_2D',
-    'SAMPLER_CUBE'
-];
 
 const vshaderSkelton = `
 attribute vec4 aVertexPosition;
@@ -106,17 +87,13 @@ function load() {
         alert('Unable to initialize WebGL. Your browser or machine may not support it.');
         return;
     }
-    const glIntToTypeName = {};
-    glTypeName.forEach(function (typeName) {
-        glIntToTypeName[gl[typeName]] = typeName;
-    });
-    console.log(glIntToTypeName);
 
+    const glw = new GLWrapper(gl);
 
     const vsSource = shaderSourceFromEditor("vshader-source");
     const fsSource = shaderSourceFromEditor("fshader-source");
 
-    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    const shaderProgram = glw.initShaderProgram(vsSource, fsSource);
 
     const programInfo = {
         program: shaderProgram,
@@ -152,7 +129,7 @@ function load() {
         itemElm.appendChild(valueElm);
 
         nameElm.textContent = `${v.name} :`;
-        typeElm.textContent = glIntToTypeName[v.type];
+        typeElm.textContent = glw.typeIdToTypeName(v.type);
         valueElm.value = 0;
 
         itemElm.addEventListener('change', function (ev) {
@@ -161,7 +138,7 @@ function load() {
     });
     document.getElementById('variables').appendChild(uniformList);
 
-    const buffers = initBuffers(gl);
+    const buffers = glw.initBuffers();
 
     state.canvas = canvas;
     state.gl = gl;
@@ -184,38 +161,6 @@ function load() {
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
-}
-
-function initBuffers(gl) {
-
-    const positionBuffer = gl.createBuffer();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-    const positions = [
-        1.0, 1.0,
-        -1.0, 1.0,
-        1.0, -1.0,
-        -1.0, -1.0,
-    ];
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-    const colors = [
-        1.0, 1.0, 1.0, 1.0,    // white
-        1.0, 0.0, 0.0, 1.0,    // red
-        0.0, 1.0, 0.0, 1.0,    // green
-        0.0, 0.0, 1.0, 1.0,    // blue
-    ];
-
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-    return {
-        position: positionBuffer,
-        color: colorBuffer,
-    };
 }
 
 function drawScene(gl, programInfo, buffers, deltaTime) {
@@ -304,39 +249,6 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
     }
 
     squareRotation += deltaTime;
-}
-
-function initShaderProgram(gl, vsSource, fsSource) {
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
-
-    const shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
-
-
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
-        return null;
-    }
-
-    return shaderProgram;
-}
-
-function loadShader(gl, type, source) {
-    const shader = gl.createShader(type);
-
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-    }
-
-    return shader;
 }
 
 function shaderSourceFromEditor(id) {
