@@ -1,6 +1,6 @@
 import "normalize.css";
 import "../css/app.css";
-import { GLWrapper } from "./gl_helper.js";
+import { GLElement, GLWrapper } from "./gl_helper.js";
 
 const { mat4 } = require("gl-matrix");
 
@@ -118,23 +118,36 @@ function load() {
     const uniformList = document.createElement('ol');
     uni_info.forEach(function (v) {
         const itemElm = document.createElement('li');
-        const nameElm = document.createElement('div');
-        const typeElm = document.createElement('div');
-        const valueElm = document.createElement('input');
-        valueElm.type = 'text';
-
         uniformList.appendChild(itemElm);
-        itemElm.appendChild(nameElm);
-        itemElm.appendChild(typeElm);
-        itemElm.appendChild(valueElm);
-
-        nameElm.textContent = `${v.name} :`;
-        typeElm.textContent = glw.typeIdToTypeName(v.type);
-        valueElm.value = 0;
-
         itemElm.addEventListener('change', function (ev) {
             gl.uniform1f(v.location, Number.parseFloat(ev.target.value));
         });
+
+        const nameElm = document.createElement('span');
+        nameElm.textContent = `${v.name} :`;
+        itemElm.appendChild(nameElm);
+
+        const typeElm = document.createElement('span');
+        typeElm.textContent = glw.typeIdToTypeName(v.type);
+        itemElm.appendChild(typeElm);
+
+        const dim = glw.TypeIdToDimension(v.type);
+        console.log(dim);
+        if (!dim) {
+            return;
+        }
+
+        for (let i = 0; i < dim[0]; i++) {
+            const rowElm = document.createElement('div');
+            rowElm.class = 'matrix-row';
+            itemElm.appendChild(rowElm);
+            for (let j = 0; j < dim[1]; j++) {
+                const valueElm = document.createElement('input');
+                valueElm.type = 'text';
+                rowElm.appendChild(valueElm);
+                valueElm.value = 0;
+            }
+        }
     });
     document.getElementById('variables').appendChild(uniformList);
 

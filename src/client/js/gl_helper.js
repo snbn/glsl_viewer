@@ -39,7 +39,7 @@ export class GLWrapper {
         glTypeName.forEach(function (typeName) {
             self.typeToNameMapping[gl[typeName]] = typeName;
             let tmp;
-            switch (typeName) {
+            switch (gl[typeName]) {
                 case gl.FLOAT:
                 case gl.FLOAT_VEC2:
                 case gl.FLOAT_VEC3:
@@ -68,7 +68,7 @@ export class GLWrapper {
             self.typeToElementTypeMapping[gl[typeName]] = tmp;
 
             let dim;
-            switch (typeName) {
+            switch (gl[typeName]) {
                 case gl.FLOAT:
                 case gl.INT:
                 case gl.BOOL:
