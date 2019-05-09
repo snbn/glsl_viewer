@@ -1,7 +1,28 @@
 import "normalize.css";
 import "../css/app.css";
 
-var { mat4 } = require("gl-matrix");
+const { mat4 } = require("gl-matrix");
+
+const glTypeName = [
+    'FLOAT',
+    'FLOAT_VEC2',
+    'FLOAT_VEC3',
+    'FLOAT_VEC4',
+    'INT',
+    'INT_VEC2',
+    'INT_VEC3',
+    'INT_VEC4',
+    'BOOL',
+    'BOOL_VEC2',
+    'BOOL_VEC3',
+    'BOOL_VEC4',
+    'FLOAT_MAT2',
+    'FLOAT_MAT3',
+    'FLOAT_MAT4',
+    'SAMPLER_2D',
+    'SAMPLER_CUBE'
+];
+
 
 const vshaderSkelton = `
 attribute vec4 aVertexPosition;
@@ -27,9 +48,9 @@ void main(void) {
 document.getElementById("vshader-source").value = vshaderSkelton;
 document.getElementById("fshader-source").value = fshaderSkelton;
 
-var squareRotation = 0.0;
+let squareRotation = 0.0;
 
-var state = {
+const state = {
     canvas: null,
     gl: null,
     shaderInfo: {
@@ -51,7 +72,7 @@ var state = {
     renderLastUpdated: 0.0
 };
 
-var runButton = document.getElementById('run-button');
+const runButton = document.getElementById('run-button');
 runButton.addEventListener('click', reload);
 load();
 
@@ -61,29 +82,39 @@ function reload() {
 }
 
 function clean() {
-    let gl = state.gl;
+    const gl = state.gl;
 
     Object.values(state.glBuffers).forEach(function (b) {
         gl.deleteBuffer(b);
     });
     gl.deleteProgram(state.shaderInfo.program);
+
+    const variablesElement = document.getElementById('variables');
+    variablesElement.removeChild(variablesElement.firstChild);
+
     state.renderLoopId += 1;
 }
 
 function load() {
-    let canvas = document.querySelector('#glcanvas');
+    const canvas = document.querySelector('#glcanvas');
     if (!state.gl) {
         state.gl = canvas.getContext('webgl');
     }
-    let gl = state.gl;
+    const gl = state.gl;
 
     if (!gl) {
         alert('Unable to initialize WebGL. Your browser or machine may not support it.');
         return;
     }
+    const glIntToTypeName = {};
+    glTypeName.forEach(function (typeName) {
+        glIntToTypeName[gl[typeName]] = typeName;
+    });
+    console.log(glIntToTypeName);
 
-    var vsSource = shaderSourceFromEditor("vshader-source");
-    var fsSource = shaderSourceFromEditor("fshader-source");
+
+    const vsSource = shaderSourceFromEditor("vshader-source");
+    const fsSource = shaderSourceFromEditor("fshader-source");
 
     const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
 
@@ -99,6 +130,30 @@ function load() {
         },
     };
 
+    const uni_num = gl.getProgramParameter(shaderProgram, gl.ACTIVE_UNIFORMS);
+    const uni_info = [];
+    for (let i = 0; i < uni_num; i++) {
+        const info = gl.getActiveUniform(shaderProgram, i);
+        uni_info.push(info);
+    }
+
+    const uniformList = document.createElement('ol');
+    uni_info.forEach(function (v) {
+        const itemElm = document.createElement('li');
+        const nameElm = document.createElement('div');
+        const typeElm = document.createElement('div');
+        const valueElm = document.createElement('div');
+        uniformList.appendChild(itemElm);
+        itemElm.appendChild(nameElm);
+        itemElm.appendChild(typeElm);
+        itemElm.appendChild(valueElm);
+
+        nameElm.textContent = `${v.name} :`;
+        typeElm.textContent = glIntToTypeName[v.type];
+        valueElm.textContent = 0;
+    });
+    document.getElementById('variables').appendChild(uniformList);
+
     const buffers = initBuffers(gl);
 
     state.canvas = canvas;
@@ -106,7 +161,7 @@ function load() {
     state.shaderInfo = programInfo;
     state.glBuffers = buffers;
 
-    var renderLoopId = state.renderLoopId;
+    const renderLoopId = state.renderLoopId;
     squareRotation = 0.0;
 
     function render(now) {
@@ -278,12 +333,12 @@ function loadShader(gl, type, source) {
 }
 
 function shaderSourceFromEditor(id) {
-    var sourceElement = document.getElementById(id);
+    const sourceElement = document.getElementById(id);
     if (!sourceElement) {
         return null;
     }
 
-    var source = sourceElement.value;
+    const source = sourceElement.value;
 
     return source;
 }
