@@ -23,7 +23,6 @@ const glTypeName = [
     'SAMPLER_CUBE'
 ];
 
-
 const vshaderSkelton = `
 attribute vec4 aVertexPosition;
 attribute vec4 aVertexColor;
@@ -39,10 +38,11 @@ void main(void) {
 }`;
 
 const fshaderSkelton = `
+uniform lowp float factor;
 varying lowp vec4 vColor;
 
 void main(void) {
-    gl_FragColor = vColor;
+    gl_FragColor = factor * vColor;
 }`;
 
 document.getElementById("vshader-source").value = vshaderSkelton;
@@ -134,6 +134,7 @@ function load() {
     const uni_info = [];
     for (let i = 0; i < uni_num; i++) {
         const info = gl.getActiveUniform(shaderProgram, i);
+        info.location = gl.getUniformLocation(shaderProgram, info.name);
         uni_info.push(info);
     }
 
@@ -142,7 +143,9 @@ function load() {
         const itemElm = document.createElement('li');
         const nameElm = document.createElement('div');
         const typeElm = document.createElement('div');
-        const valueElm = document.createElement('div');
+        const valueElm = document.createElement('input');
+        valueElm.type = 'text';
+
         uniformList.appendChild(itemElm);
         itemElm.appendChild(nameElm);
         itemElm.appendChild(typeElm);
@@ -150,7 +153,11 @@ function load() {
 
         nameElm.textContent = `${v.name} :`;
         typeElm.textContent = glIntToTypeName[v.type];
-        valueElm.textContent = 0;
+        valueElm.value = 0;
+
+        itemElm.addEventListener('change', function (ev) {
+            gl.uniform1f(v.location, Number.parseFloat(ev.target.value));
+        });
     });
     document.getElementById('variables').appendChild(uniformList);
 
