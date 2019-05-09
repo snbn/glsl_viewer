@@ -19,16 +19,90 @@ const glTypeName = [
     'SAMPLER_CUBE'
 ];
 
+const GLElement = {
+    UNDEFINED: 0,
+    FLOAT: 1,
+    INT: 2,
+    BOOL: 3
+};
+
 export class GLWrapper {
     constructor(glContext) {
         let gl = glContext;
 
         this.glContext = gl;
         this.typeToNameMapping = {};
+        this.typeToElementTypeMapping = {};
+        this.typeToDimensionMapping = {};
 
         const self = this;
         glTypeName.forEach(function (typeName) {
             self.typeToNameMapping[gl[typeName]] = typeName;
+            let tmp;
+            switch (typeName) {
+                case gl.FLOAT:
+                case gl.FLOAT_VEC2:
+                case gl.FLOAT_VEC3:
+                case gl.FLOAT_VEC4:
+                case gl.FLOAT_MAT2:
+                case gl.FLOAT_MAT3:
+                case gl.FLOAT_MAT4:
+                    tmp = GLElement.FLOAT;
+                    break;
+                case gl.INT:
+                case gl.INT_VEC2:
+                case gl.INT_VEC3:
+                case gl.INT_VEC4:
+                    tmp = GLElement.INT;
+                    break;
+                case gl.BOOL:
+                case gl.BOOL_VEC2:
+                case gl.BOOL_VEC3:
+                case gl.BOOL_VEC4:
+                    tmp = GLElement.BOOL;
+                    break;
+                default:
+                    tmp = GLElement.UNDEFINED;
+                    break;
+            }
+            self.typeToElementTypeMapping[gl[typeName]] = tmp;
+
+            let dim;
+            switch (typeName) {
+                case gl.FLOAT:
+                case gl.INT:
+                case gl.BOOL:
+                    dim = [1, 1];
+                    break;
+                case gl.FLOAT_VEC2:
+                case gl.INT_VEC2:
+                case gl.BOOL_VEC2:
+                    dim = [1, 2];
+                    break;
+                case gl.FLOAT_VEC3:
+                case gl.INT_VEC3:
+                case gl.BOOL_VEC3:
+                    dim = [1, 3];
+                    break;
+                case gl.FLOAT_VEC4:
+                case gl.INT_VEC4:
+                case gl.BOOL_VEC4:
+                    dim = [1, 4];
+                    break;
+                case gl.FLOAT_MAT2:
+                    dim = [2, 2];
+                    break;
+                case gl.FLOAT_MAT3:
+                    dim = [3, 3];
+                    break;
+                case gl.FLOAT_MAT4:
+                    dim = [4, 4];
+                    break;
+                default:
+                    dim = null;
+                    break;
+            }
+            self.typeToDimensionMapping[gl[typeName]] = dim;
         });
     }
     get context() {
@@ -36,6 +110,12 @@ export class GLWrapper {
     }
     typeIdToTypeName(typeId) {
         return this.typeToNameMapping[typeId];
+    }
+    TypeIdToDimension(typeId) {
+        return this.typeToDimensionMapping[typeId];
+    }
+    TypeIdtoElementType(typeId) {
+        return this.typeToElementTypeMapping[typeId];
     }
     initShaderProgram(vsSource, fsSource) {
         const gl = this.glContext;
