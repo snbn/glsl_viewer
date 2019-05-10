@@ -20,10 +20,11 @@ void main(void) {
 
 const fshaderSkelton = `
 uniform lowp float factor;
+uniform lowp vec4 colOffset;
 varying lowp vec4 vColor;
 
 void main(void) {
-    gl_FragColor = factor * vColor;
+    gl_FragColor = factor * (vColor + colOffset);
 }`;
 
 document.getElementById("vshader-source").value = vshaderSkelton;
@@ -118,9 +119,36 @@ function load() {
     const uniformList = document.createElement('ol');
     uni_info.forEach(function (v) {
         const itemElm = document.createElement('li');
+        itemElm.id = `uniform-${v.name}`;
         uniformList.appendChild(itemElm);
+
         itemElm.addEventListener('change', function (ev) {
-            gl.uniform1f(v.location, Number.parseFloat(ev.target.value));
+            const row = itemElm.getAttribute('data-row');
+            const col = itemElm.getAttribute('data-col');
+            const elmType = Number.parseInt(itemElm.getAttribute('data-elm_type'));
+            const isMatrix = row !== '1' && row === col;
+
+            let suffix = elmType === GLElement.FLOAT ? 'f' : 'i';
+            suffix = col.toString() + suffix;
+            suffix = isMatrix ? 'Matrix' + suffix : suffix;
+            const funcName = 'uniform' + suffix;
+
+            const valuesElm = document.querySelector(`#${itemElm.id} > .values`);
+            if (isMatrix) {
+
+            } else {
+                const data = [];
+                const rowElm = valuesElm.firstChild;
+                let currElm = rowElm.firstChild;
+                for (let i = 0; i < col; i++) {
+                    const a = elmType === GLElement.FLOAT ?
+                        Number.parseFloat(currElm.value) : Number.parseInt(currElm.value);
+                    data.push(a);
+
+                    currElm = currElm.nextSibling;
+                }
+                gl[funcName](v.location, ...data);
+            }
         });
 
         const nameElm = document.createElement('span');
@@ -132,15 +160,22 @@ function load() {
         itemElm.appendChild(typeElm);
 
         const dim = glw.TypeIdToDimension(v.type);
-        console.log(dim);
         if (!dim) {
             return;
         }
+        const elmType = glw.TypeIdtoElementType(v.type);
+        itemElm.setAttribute('data-row', dim[0]);
+        itemElm.setAttribute('data-col', dim[1]);
+        itemElm.setAttribute('data-elm_type', elmType);
+
+        const valuesElm = document.createElement('div');
+        valuesElm.className = 'values';
+        itemElm.appendChild(valuesElm);
 
         for (let i = 0; i < dim[0]; i++) {
             const rowElm = document.createElement('div');
             rowElm.class = 'matrix-row';
-            itemElm.appendChild(rowElm);
+            valuesElm.appendChild(rowElm);
             for (let j = 0; j < dim[1]; j++) {
                 const valueElm = document.createElement('input');
                 valueElm.type = 'text';

@@ -19,7 +19,7 @@ const glTypeName = [
     'SAMPLER_CUBE'
 ];
 
-const GLElement = {
+export const GLElement = {
     UNDEFINED: 0,
     FLOAT: 1,
     INT: 2,
