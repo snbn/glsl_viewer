@@ -1,28 +1,8 @@
 import "normalize.css";
 import "../css/app.css";
+import { GLElement, GLWrapper } from "./gl_helper.js";
 
 const { mat4 } = require("gl-matrix");
-
-const glTypeName = [
-    'FLOAT',
-    'FLOAT_VEC2',
-    'FLOAT_VEC3',
-    'FLOAT_VEC4',
-    'INT',
-    'INT_VEC2',
-    'INT_VEC3',
-    'INT_VEC4',
-    'BOOL',
-    'BOOL_VEC2',
-    'BOOL_VEC3',
-    'BOOL_VEC4',
-    'FLOAT_MAT2',
-    'FLOAT_MAT3',
-    'FLOAT_MAT4',
-    'SAMPLER_2D',
-    'SAMPLER_CUBE'
-];
-
 
 const vshaderSkelton = `
 attribute vec4 aVertexPosition;
@@ -39,10 +19,12 @@ void main(void) {
 }`;
 
 const fshaderSkelton = `
+uniform lowp float factor;
+uniform lowp vec4 colOffset;
 varying lowp vec4 vColor;
 
 void main(void) {
-    gl_FragColor = vColor;
+    gl_FragColor = factor * (vColor + colOffset);
 }`;
 
 document.getElementById("vshader-source").value = vshaderSkelton;
@@ -106,17 +88,13 @@ function load() {
         alert('Unable to initialize WebGL. Your browser or machine may not support it.');
         return;
     }
-    const glIntToTypeName = {};
-    glTypeName.forEach(function (typeName) {
-        glIntToTypeName[gl[typeName]] = typeName;
-    });
-    console.log(glIntToTypeName);
 
+    const glw = new GLWrapper(gl);
 
     const vsSource = shaderSourceFromEditor("vshader-source");
     const fsSource = shaderSourceFromEditor("fshader-source");
 
-    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    const shaderProgram = glw.initShaderProgram(vsSource, fsSource);
 
     const programInfo = {
         program: shaderProgram,
@@ -134,27 +112,81 @@ function load() {
     const uni_info = [];
     for (let i = 0; i < uni_num; i++) {
         const info = gl.getActiveUniform(shaderProgram, i);
+        info.location = gl.getUniformLocation(shaderProgram, info.name);
         uni_info.push(info);
     }
 
     const uniformList = document.createElement('ol');
     uni_info.forEach(function (v) {
         const itemElm = document.createElement('li');
-        const nameElm = document.createElement('div');
-        const typeElm = document.createElement('div');
-        const valueElm = document.createElement('div');
+        itemElm.id = `uniform-${v.name}`;
         uniformList.appendChild(itemElm);
-        itemElm.appendChild(nameElm);
-        itemElm.appendChild(typeElm);
-        itemElm.appendChild(valueElm);
 
+        itemElm.addEventListener('change', function (ev) {
+            const row = itemElm.getAttribute('data-row');
+            const col = itemElm.getAttribute('data-col');
+            const elmType = Number.parseInt(itemElm.getAttribute('data-elm_type'));
+            const isMatrix = row !== '1' && row === col;
+
+            let suffix = elmType === GLElement.FLOAT ? 'f' : 'i';
+            suffix = col.toString() + suffix;
+            suffix = isMatrix ? 'Matrix' + suffix : suffix;
+            const funcName = 'uniform' + suffix;
+
+            const valuesElm = document.querySelector(`#${itemElm.id} > .values`);
+            if (isMatrix) {
+
+            } else {
+                const data = [];
+                const rowElm = valuesElm.firstChild;
+                let currElm = rowElm.firstChild;
+                for (let i = 0; i < col; i++) {
+                    const a = elmType === GLElement.FLOAT ?
+                        Number.parseFloat(currElm.value) : Number.parseInt(currElm.value);
+                    data.push(a);
+
+                    currElm = currElm.nextSibling;
+                }
+                gl[funcName](v.location, ...data);
+            }
+        });
+
+        const nameElm = document.createElement('span');
         nameElm.textContent = `${v.name} :`;
-        typeElm.textContent = glIntToTypeName[v.type];
-        valueElm.textContent = 0;
+        itemElm.appendChild(nameElm);
+
+        const typeElm = document.createElement('span');
+        typeElm.textContent = glw.typeIdToTypeName(v.type);
+        itemElm.appendChild(typeElm);
+
+        const dim = glw.TypeIdToDimension(v.type);
+        if (!dim) {
+            return;
+        }
+        const elmType = glw.TypeIdtoElementType(v.type);
+        itemElm.setAttribute('data-row', dim[0]);
+        itemElm.setAttribute('data-col', dim[1]);
+        itemElm.setAttribute('data-elm_type', elmType);
+
+        const valuesElm = document.createElement('div');
+        valuesElm.className = 'values';
+        itemElm.appendChild(valuesElm);
+
+        for (let i = 0; i < dim[0]; i++) {
+            const rowElm = document.createElement('div');
+            rowElm.class = 'matrix-row';
+            valuesElm.appendChild(rowElm);
+            for (let j = 0; j < dim[1]; j++) {
+                const valueElm = document.createElement('input');
+                valueElm.type = 'text';
+                rowElm.appendChild(valueElm);
+                valueElm.value = 0;
+            }
+        }
     });
     document.getElementById('variables').appendChild(uniformList);
 
-    const buffers = initBuffers(gl);
+    const buffers = glw.initBuffers();
 
     state.canvas = canvas;
     state.gl = gl;
@@ -177,38 +209,6 @@ function load() {
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
-}
-
-function initBuffers(gl) {
-
-    const positionBuffer = gl.createBuffer();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-    const positions = [
-        1.0, 1.0,
-        -1.0, 1.0,
-        1.0, -1.0,
-        -1.0, -1.0,
-    ];
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-    const colors = [
-        1.0, 1.0, 1.0, 1.0,    // white
-        1.0, 0.0, 0.0, 1.0,    // red
-        0.0, 1.0, 0.0, 1.0,    // green
-        0.0, 0.0, 1.0, 1.0,    // blue
-    ];
-
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-    return {
-        position: positionBuffer,
-        color: colorBuffer,
-    };
 }
 
 function drawScene(gl, programInfo, buffers, deltaTime) {
@@ -297,39 +297,6 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
     }
 
     squareRotation += deltaTime;
-}
-
-function initShaderProgram(gl, vsSource, fsSource) {
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
-
-    const shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
-
-
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
-        return null;
-    }
-
-    return shaderProgram;
-}
-
-function loadShader(gl, type, source) {
-    const shader = gl.createShader(type);
-
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-    }
-
-    return shader;
 }
 
 function shaderSourceFromEditor(id) {

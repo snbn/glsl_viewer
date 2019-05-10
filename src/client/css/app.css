@@ -36,18 +36,30 @@ button {
 }
 
 #result {
+    height: 50%;
     background-color: cyan;
     display: flex;
     flex-direction: row;
 }
 
 #variables {
+    height: 100%;
     background-color: pink;
+    overflow-y: scroll;
+}
+
+#variables input {
+    width: 25%;
+}
+
+.matrix-row {
+    display: flex;
+    flex-direction: row;
 }
 
 #editors {
     width: auto;
-    height: 100%;
+    height: 50%;
     display: flex;
     flex-direction: row;
 }
