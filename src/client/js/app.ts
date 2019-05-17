@@ -1,6 +1,6 @@
-import { GLElement, GLWrapper } from "./gl_helper.js";
+import { GLElement, GLWrapper } from "./gl_helper";
 
-const { mat4 } = require("gl-matrix");
+import { mat4 } from "gl-matrix";
 
 const vshaderSkelton = `
 attribute vec4 aVertexPosition;
