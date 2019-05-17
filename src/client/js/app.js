@@ -123,32 +123,33 @@ function load() {
         uniformList.appendChild(itemElm);
 
         itemElm.addEventListener('change', function (ev) {
-            const row = itemElm.getAttribute('data-row');
-            const col = itemElm.getAttribute('data-col');
+            const row = Number.parseInt(itemElm.getAttribute('data-row'));
+            const col = Number.parseInt(itemElm.getAttribute('data-col'));
             const elmType = Number.parseInt(itemElm.getAttribute('data-elm_type'));
-            const isMatrix = row !== '1' && row === col;
+            const isMatrix = row !== 1 && row === col;
+            const isFloat = elmType === GLElement.FLOAT;
 
-            let suffix = elmType === GLElement.FLOAT ? 'f' : 'i';
+            let suffix = isFloat ? 'f' : 'i';
+            suffix += 'v';
             suffix = col.toString() + suffix;
             suffix = isMatrix ? 'Matrix' + suffix : suffix;
             const funcName = 'uniform' + suffix;
 
             const valuesElm = document.querySelector(`#${itemElm.id} > .values`);
-            if (isMatrix) {
+            const data = new Float32Array(row * col);
 
-            } else {
-                const data = [];
-                const rowElm = valuesElm.firstChild;
-                let currElm = rowElm.firstChild;
-                for (let i = 0; i < col; i++) {
-                    const a = elmType === GLElement.FLOAT ?
-                        Number.parseFloat(currElm.value) : Number.parseInt(currElm.value);
-                    data.push(a);
-
-                    currElm = currElm.nextSibling;
+            let currRowElm = valuesElm.firstChild;
+            for (let i = 0; i < row; i++) {
+                let currValElm = currRowElm.firstChild;
+                for (let j = 0; j < col; j++) {
+                    const a = isFloat ?
+                        Number.parseFloat(currValElm.value) : Number.parseInt(currValElm.value);
+                    data[i * col + j] = a;
+                    currValElm = currValElm.nextSibling;
                 }
-                gl[funcName](v.location, ...data);
+                currRowElm = currRowElm.nextSibling;
             }
+            gl[funcName](v.location, data);
         });
 
         const nameElm = document.createElement('span');
