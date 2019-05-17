@@ -1,5 +1,3 @@
-import "normalize.css";
-import "../css/app.css";
 import { GLElement, GLWrapper } from "./gl_helper.js";
 
 const { mat4 } = require("gl-matrix");
