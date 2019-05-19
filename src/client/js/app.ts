@@ -10,28 +10,8 @@ function unwrap<T>(v: T | null): T {
     }
 }
 
-const vshaderSkelton = `
-attribute vec4 aVertexPosition;
-attribute vec4 aVertexColor;
-
-uniform mat4 uModelViewMatrix;
-uniform mat4 uProjectionMatrix;
-
-varying lowp vec4 vColor;
-
-void main(void) {
-    gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-    vColor = aVertexColor;
-}`;
-
-const fshaderSkelton = `
-uniform lowp float factor;
-uniform lowp vec4 colOffset;
-varying lowp vec4 vColor;
-
-void main(void) {
-    gl_FragColor = factor * (vColor + colOffset);
-}`;
+const vshaderSkelton = '';
+const fshaderSkelton = '';
 
 class App {
     canvas: HTMLCanvasElement | null;
