@@ -1,14 +1,6 @@
 import { GLElement, GLWrapper } from "./gl_helper";
-
+import { unwrap } from "./misc";
 import { mat4 } from "gl-matrix";
-
-function unwrap<T>(v: T | null): T {
-    if (v == null) {
-        throw new Error('unwrap is called with null value');
-    } else {
-        return v;
-    }
-}
 
 const vshaderSkelton = '';
 const fshaderSkelton = '';
