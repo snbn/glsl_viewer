@@ -1,6 +1,6 @@
-import { GLElement, GLWrapper } from "./gl_helper";
-import { unwrap } from "./misc";
-import { mat4 } from "gl-matrix";
+import { GLElement, GLWrapper } from './gl_helper';
+import { unwrap } from './misc';
+import { mat4 } from 'gl-matrix';
 
 const vshaderSkelton = '';
 const fshaderSkelton = '';
@@ -15,8 +15,8 @@ class App {
     renderLastUpdated: number;
     squareRotation: number;
     constructor() {
-        unwrap(document.getElementById("vshader-source")).setAttribute('value', vshaderSkelton);
-        unwrap(document.getElementById("fshader-source")).setAttribute('value', fshaderSkelton);
+        unwrap(document.getElementById('vshader-source')).setAttribute('value', vshaderSkelton);
+        unwrap(document.getElementById('fshader-source')).setAttribute('value', fshaderSkelton);
 
         const self = this;
         unwrap(document.getElementById('run-button')).addEventListener('click', function () {
@@ -66,8 +66,8 @@ class App {
             const app = this;
             const glw = new GLWrapper(gl);
 
-            const vsSource = unwrap(this.shaderSourceFromEditor("vshader-source"));
-            const fsSource = unwrap(this.shaderSourceFromEditor("fshader-source"));
+            const vsSource = unwrap(this.shaderSourceFromEditor('vshader-source'));
+            const fsSource = unwrap(this.shaderSourceFromEditor('fshader-source'));
 
             const shaderProgram = unwrap(glw.initShaderProgram(vsSource, fsSource));
 
@@ -83,17 +83,17 @@ class App {
                 },
             };
 
-            const uni_num = gl.getProgramParameter(shaderProgram, gl.ACTIVE_UNIFORMS);
-            const uni_info: WebGLActiveInfo[] = [];
-            const uni_locations: WebGLUniformLocation[] = [];
-            for (let i = 0; i < uni_num; i++) {
+            const uniformNum = gl.getProgramParameter(shaderProgram, gl.ACTIVE_UNIFORMS);
+            const uniformInfos: WebGLActiveInfo[] = [];
+            const uniformLocations: WebGLUniformLocation[] = [];
+            for (let i = 0; i < uniformNum; i++) {
                 const info = unwrap(gl.getActiveUniform(shaderProgram, i));
-                uni_locations.push(unwrap(gl.getUniformLocation(shaderProgram, info.name)));
-                uni_info.push(info);
+                uniformLocations.push(unwrap(gl.getUniformLocation(shaderProgram, info.name)));
+                uniformInfos.push(info);
             }
 
             const uniformList = document.createElement('ol');
-            uni_info.forEach(function (v, idx) {
+            uniformInfos.forEach(function (v, idx) {
                 const itemElm = document.createElement('li');
                 itemElm.id = `uniform-${v.name}`;
                 uniformList.appendChild(itemElm);
