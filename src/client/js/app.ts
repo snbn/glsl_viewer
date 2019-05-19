@@ -2,8 +2,30 @@ import { GLElement, GLWrapper } from './gl_helper';
 import { unwrap } from './misc';
 import { mat4 } from 'gl-matrix';
 
-const vshaderSkelton = '';
-const fshaderSkelton = '';
+let vshaderSkelton: string = '';
+let fshaderSkelton: string = '';
+
+Promise.all([
+    fetch('shader/fragmentshader.frag', { method: 'GET' })
+        .then(
+            (res) => res.text()
+        )
+        .then(
+            (text) => {
+                fshaderSkelton = text;
+            }),
+
+    fetch('shader/vertexshader.vert', { method: 'GET' })
+        .then(
+            (res) => res.text()
+        )
+        .then(
+            (text) => {
+                vshaderSkelton = text;
+            }),
+]).then(() => {
+    new App();
+});
 
 class App {
     canvas: HTMLCanvasElement | null;
@@ -15,8 +37,12 @@ class App {
     renderLastUpdated: number;
     squareRotation: number;
     constructor() {
-        unwrap(document.getElementById('vshader-source')).setAttribute('value', vshaderSkelton);
-        unwrap(document.getElementById('fshader-source')).setAttribute('value', fshaderSkelton);
+        unwrap(document.getElementById('vshader-source')).setAttribute('value',
+            unwrap(vshaderSkelton)
+        );
+        unwrap(document.getElementById('fshader-source')).setAttribute('value',
+            unwrap(fshaderSkelton)
+        );
 
         const self = this;
         unwrap(document.getElementById('run-button')).addEventListener('click', function () {
@@ -116,13 +142,13 @@ class App {
 
                     let currRowElm = unwrap(valuesElm.firstChild);
                     for (let i = 0; i < row; i++) {
-                        let currValElm = unwrap(currRowElm.firstChild) as Element;
+                        let currValElm = unwrap(currRowElm.firstChild) as HTMLInputElement;
                         for (let j = 0; j < col; j++) {
                             const v = unwrap(currValElm.getAttribute('value'));
                             const a = isFloat ?
                                 Number.parseFloat(v) : Number.parseInt(v);
                             data[i * col + j] = a;
-                            currValElm = currValElm.nextSibling! as Element;
+                            currValElm = currValElm.nextSibling! as HTMLInputElement;
                         }
                         currRowElm = currRowElm.nextSibling!;
                     }
@@ -289,5 +315,3 @@ class App {
     }
 
 }
-
-new App();
