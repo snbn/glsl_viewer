@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "types/*"
+            ]
+        },
+        "strict": true,
+        "target": "es2017",
+        "noImplicitAny": false
+    },
+    "include": [
+        "src/client/js/*.ts"
+    ]
+}

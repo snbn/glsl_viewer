@@ -27,7 +27,11 @@ export const GLElement = {
 };
 
 export class GLWrapper {
-    constructor(glContext) {
+    glContext: WebGLRenderingContext;
+    typeToNameMapping: any;
+    typeToElementTypeMapping: any;
+    typeToDimensionMapping: any;
+    constructor(glContext: WebGLRenderingContext) {
         let gl = glContext;
 
         this.glContext = gl;
@@ -37,9 +41,10 @@ export class GLWrapper {
 
         const self = this;
         glTypeName.forEach(function (typeName) {
-            self.typeToNameMapping[gl[typeName]] = typeName;
+            const idx = gl[typeName] as number;
+            self.typeToNameMapping[idx] = typeName;
             let tmp;
-            switch (gl[typeName]) {
+            switch (idx) {
                 case gl.FLOAT:
                 case gl.FLOAT_VEC2:
                 case gl.FLOAT_VEC3:
@@ -65,10 +70,10 @@ export class GLWrapper {
                     tmp = GLElement.UNDEFINED;
                     break;
             }
-            self.typeToElementTypeMapping[gl[typeName]] = tmp;
+            self.typeToElementTypeMapping[idx] = tmp;
 
             let dim;
-            switch (gl[typeName]) {
+            switch (idx) {
                 case gl.FLOAT:
                 case gl.INT:
                 case gl.BOOL:
@@ -102,28 +107,35 @@ export class GLWrapper {
                     dim = null;
                     break;
             }
-            self.typeToDimensionMapping[gl[typeName]] = dim;
+            self.typeToDimensionMapping[idx] = dim;
         });
     }
     get context() {
         return this.glContext;
     }
-    typeIdToTypeName(typeId) {
+    typeIdToTypeName(typeId: number) {
         return this.typeToNameMapping[typeId];
     }
-    TypeIdToDimension(typeId) {
+    TypeIdToDimension(typeId: number) {
         return this.typeToDimensionMapping[typeId];
     }
-    TypeIdtoElementType(typeId) {
+    TypeIdtoElementType(typeId: number) {
         return this.typeToElementTypeMapping[typeId];
     }
-    initShaderProgram(vsSource, fsSource) {
+    initShaderProgram(vsSource: string, fsSource: string) {
         const gl = this.glContext;
 
         const vertexShader = this.loadShader(gl.VERTEX_SHADER, vsSource);
         const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, fsSource);
 
+        if (vertexShader == null || fragmentShader == null) {
+            throw new Error('failed to load shader');
+        }
+
         const shaderProgram = gl.createProgram();
+        if (shaderProgram == null) {
+            throw new Error('failed to create shader');
+        }
         gl.attachShader(shaderProgram, vertexShader);
         gl.attachShader(shaderProgram, fragmentShader);
         gl.linkProgram(shaderProgram);
@@ -135,11 +147,13 @@ export class GLWrapper {
 
         return shaderProgram;
     }
-    loadShader(type, source) {
+    loadShader(type: number, source: string): WebGLShader | null {
         const gl = this.glContext;
 
         const shader = gl.createShader(type);
-
+        if (shader == null) {
+            return null;
+        }
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
 
