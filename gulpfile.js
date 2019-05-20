@@ -3,6 +3,7 @@ const gulp = require('gulp');
 const browserify = require('browserify');
 const babelify = require('babelify');
 const tsify = require('tsify');
+const less = require('gulp-less');
 
 function bundleScript() {
     return browserify('src/client/script/app.ts')
@@ -11,18 +12,20 @@ function bundleScript() {
         .bundle().pipe(fs.createWriteStream('public/out/bundle.js'));
 }
 
-function copyHtml() {
-    return gulp.src('src/client/index.html').pipe(gulp.dest('public'));
+function compileLess() {
+    return gulp.src('src/client/style/app.less')
+        .pipe(less())
+        .pipe(gulp.dest('public/css'));
 }
 
-function copyCss() {
-    return gulp.src('src/client/style/app.css').pipe(gulp.dest('public/css'));
+function copyHtml() {
+    return gulp.src('src/client/index.html').pipe(gulp.dest('public'));
 }
 
 function copyShader() {
     return gulp.src('src/client/shader/*').pipe(gulp.dest('public/shader'));
 }
 
-const all = gulp.parallel(copyShader, copyCss, copyHtml, bundleScript);
+const all = gulp.parallel(copyShader, compileLess, copyHtml, bundleScript);
 
 exports.default = all;

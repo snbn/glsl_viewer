@@ -21,6 +21,7 @@
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
     "gulp": "^4.0.1",
+    "gulp-less": "^4.0.1",
     "gulp-typescript": "^5.0.1",
     "less": "^3.9.0",
     "tsify": "^4.0.1",
