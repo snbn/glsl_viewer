@@ -6,10 +6,10 @@ const tsify = require('tsify');
 const less = require('gulp-less');
 
 function bundleScript() {
-    return browserify('src/client/script/app.ts')
+    return browserify('src/client/script/app.ts', { debug: true })
         .plugin(tsify)
         .transform(babelify)
-        .bundle().pipe(fs.createWriteStream('public/out/bundle.js'));
+        .bundle().pipe(fs.createWriteStream('public/js/bundle.js'));
 }
 
 function compileLess() {
