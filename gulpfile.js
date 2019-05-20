@@ -18,6 +18,10 @@ function compileLess() {
         .pipe(gulp.dest('public/css'));
 }
 
+function copyCss() {
+    return gulp.src('node_modules/normalize.css/normalize.css').pipe(gulp.dest('public/css'));
+}
+
 function copyHtml() {
     return gulp.src('src/client/index.html').pipe(gulp.dest('public'));
 }
@@ -26,6 +30,6 @@ function copyShader() {
     return gulp.src('src/client/shader/*').pipe(gulp.dest('public/shader'));
 }
 
-const all = gulp.parallel(copyShader, compileLess, copyHtml, bundleScript);
+const all = gulp.parallel(copyCss, copyShader, compileLess, copyHtml, bundleScript);
 
 exports.default = all;

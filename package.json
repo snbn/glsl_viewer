@@ -24,6 +24,7 @@
     "gulp-less": "^4.0.1",
     "gulp-typescript": "^5.0.1",
     "less": "^3.9.0",
+    "normalize.css": "^8.0.1",
     "tsify": "^4.0.1",
     "typescript": "^3.4.5"
   }
