@@ -9,12 +9,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.4.4",
+    "core-js": "^3.0.1",
     "express": "^4.16.4",
     "gl-matrix": "^3.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3",
     "gulp": "^4.0.1",
+    "gulp-typescript": "^5.0.1",
     "less": "^3.9.0",
+    "tsify": "^4.0.1",
     "typescript": "^3.4.5"
   }
 }

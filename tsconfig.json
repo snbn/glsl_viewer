@@ -7,10 +7,10 @@
             ]
         },
         "strict": true,
-        "target": "es2017",
+        "target": "es2018",
         "noImplicitAny": false
     },
     "include": [
-        "src/client/js/*.ts"
+        "src/client/script/*.ts"
     ]
 }
