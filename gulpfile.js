@@ -4,16 +4,19 @@ const browserify = require('browserify');
 const babelify = require('babelify');
 const tsify = require('tsify');
 const less = require('gulp-less');
+const { resolve } = require('path');
+
+const srcDir = resolve(__dirname, 'src', 'client');
 
 function bundleScript() {
-    return browserify('src/client/script/app.ts', { debug: true })
+    return browserify(resolve(srcDir, 'script', 'app.ts'), { debug: true })
         .plugin(tsify)
         .transform(babelify)
         .bundle().pipe(fs.createWriteStream('public/js/bundle.js'));
 }
 
 function compileLess() {
-    return gulp.src('src/client/style/app.less')
+    return gulp.src(resolve(srcDir, 'style', 'app.less'))
         .pipe(less())
         .pipe(gulp.dest('public/css'));
 }
@@ -23,18 +26,18 @@ function copyCss() {
 }
 
 function copyHtml() {
-    return gulp.src('src/client/view/index.html').pipe(gulp.dest('public'));
+    return gulp.src(resolve(srcDir, 'view', 'index.html')).pipe(gulp.dest('public'));
 }
 
 function copyShader() {
-    return gulp.src('src/client/shader/*').pipe(gulp.dest('public/shader'));
+    return gulp.src(resolve(srcDir, 'shader', '*')).pipe(gulp.dest('public/shader'));
 }
 
 const all = gulp.parallel(copyCss, copyShader, compileLess, copyHtml, bundleScript);
 
-gulp.watch('src/client/script/*.ts', bundleScript);
-gulp.watch('src/client/shader/*', copyShader);
-gulp.watch('src/client/style/*', compileLess);
-gulp.watch('src/client/view/*.html', copyHtml);
+gulp.watch(resolve(srcDir, 'script', '*.ts'), bundleScript);
+gulp.watch(resolve(srcDir, 'shader', '*'), copyShader);
+gulp.watch(resolve(srcDir, 'style', '*'), compileLess);
+gulp.watch(resolve(srcDir, 'view', '*.html'), copyHtml);
 
 exports.default = all;
