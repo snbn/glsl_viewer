@@ -32,4 +32,9 @@ function copyShader() {
 
 const all = gulp.parallel(copyCss, copyShader, compileLess, copyHtml, bundleScript);
 
+gulp.watch('src/client/script/*.ts', bundleScript);
+gulp.watch('src/client/shader/*', copyShader);
+gulp.watch('src/client/style/*', compileLess);
+gulp.watch('src/client/*.html', copyHtml);
+
 exports.default = all;
