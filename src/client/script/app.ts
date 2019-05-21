@@ -37,12 +37,8 @@ class App {
     renderLastUpdated: number;
     squareRotation: number;
     constructor() {
-        unwrap(document.getElementById('vshader-source')).setAttribute('value',
-            unwrap(vshaderSkelton)
-        );
-        unwrap(document.getElementById('fshader-source')).setAttribute('value',
-            unwrap(fshaderSkelton)
-        );
+        (unwrap(document.getElementById('vshader-source')) as HTMLTextAreaElement).value = vshaderSkelton;
+        (unwrap(document.getElementById('fshader-source')) as HTMLTextAreaElement).value = fshaderSkelton;
 
         const self = this;
         unwrap(document.getElementById('run-button')).addEventListener('click', function () {
@@ -117,6 +113,7 @@ class App {
                 uniformLocations.push(unwrap(gl.getUniformLocation(shaderProgram, info.name)));
                 uniformInfos.push(info);
             }
+            this.uniformLocations = uniformLocations;
 
             const uniformList = document.createElement('ol');
             uniformInfos.forEach(function (v, idx) {
@@ -125,9 +122,9 @@ class App {
                 uniformList.appendChild(itemElm);
 
                 itemElm.addEventListener('change', function (ev) {
-                    const row = Number.parseInt(unwrap(itemElm.getAttribute('data-row')));
-                    const col = Number.parseInt(unwrap(itemElm.getAttribute('data-col')));
-                    const elmType = Number.parseInt(unwrap(itemElm.getAttribute('data-elm_type')));
+                    const row = Number.parseInt(unwrap(itemElm.dataset.row));
+                    const col = Number.parseInt(unwrap(itemElm.dataset.col));
+                    const elmType = Number.parseInt(unwrap(itemElm.dataset.elm_type));
                     const isMatrix = row !== 1 && row === col;
                     const isFloat = elmType === GLElement.FLOAT;
 
@@ -144,7 +141,7 @@ class App {
                     for (let i = 0; i < row; i++) {
                         let currValElm = unwrap(currRowElm.firstChild) as HTMLInputElement;
                         for (let j = 0; j < col; j++) {
-                            const v = unwrap(currValElm.getAttribute('value'));
+                            const v = currValElm.value;
                             const a = isFloat ?
                                 Number.parseFloat(v) : Number.parseInt(v);
                             data[i * col + j] = a;
@@ -168,9 +165,9 @@ class App {
                     return;
                 }
                 const elmType = glw.TypeIdtoElementType(v.type);
-                itemElm.setAttribute('data-row', dim[0]);
-                itemElm.setAttribute('data-col', dim[1]);
-                itemElm.setAttribute('data-elm_type', elmType);
+                itemElm.dataset.row = dim[0];
+                itemElm.dataset.col = dim[1];
+                itemElm.dataset.elm_type = elmType;
 
                 const valuesElm = document.createElement('div');
                 valuesElm.className = 'values';
@@ -178,7 +175,7 @@ class App {
 
                 for (let i = 0; i < dim[0]; i++) {
                     const rowElm = document.createElement('div');
-                    rowElm.setAttribute('class', 'matrix-row');
+                    rowElm.className = 'matrix-row';
                     valuesElm.appendChild(rowElm);
                     for (let j = 0; j < dim[1]; j++) {
                         const valueElm = document.createElement('input');
@@ -310,8 +307,7 @@ class App {
             return null;
         }
 
-        const source = sourceElement.getAttribute('value');
+        const source = (sourceElement as HTMLTextAreaElement).value;
         return source;
     }
-
 }
