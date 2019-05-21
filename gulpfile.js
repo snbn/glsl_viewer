@@ -23,7 +23,7 @@ function copyCss() {
 }
 
 function copyHtml() {
-    return gulp.src('src/client/index.html').pipe(gulp.dest('public'));
+    return gulp.src('src/client/view/index.html').pipe(gulp.dest('public'));
 }
 
 function copyShader() {
@@ -35,6 +35,6 @@ const all = gulp.parallel(copyCss, copyShader, compileLess, copyHtml, bundleScri
 gulp.watch('src/client/script/*.ts', bundleScript);
 gulp.watch('src/client/shader/*', copyShader);
 gulp.watch('src/client/style/*', compileLess);
-gulp.watch('src/client/*.html', copyHtml);
+gulp.watch('src/client/view/*.html', copyHtml);
 
 exports.default = all;
