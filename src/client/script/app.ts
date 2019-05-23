@@ -35,7 +35,6 @@ class App {
     glBuffers: any;
     renderLoopId: number;
     renderLastUpdated: number;
-    squareRotation: number;
     constructor() {
         (unwrap(document.getElementById('vshader-source')) as HTMLTextAreaElement).value = vshaderSkelton;
         (unwrap(document.getElementById('fshader-source')) as HTMLTextAreaElement).value = fshaderSkelton;
@@ -50,7 +49,6 @@ class App {
         this.uniformLocations = [];
         this.renderLastUpdated = 0.0;
         this.renderLoopId = 0;
-        this.squareRotation = 0;
         this.load();
     }
     reload() {
@@ -98,10 +96,6 @@ class App {
                 attribLocations: {
                     vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
                     vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
-                },
-                uniformLocations: {
-                    projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-                    modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
                 },
             };
 
@@ -195,7 +189,6 @@ class App {
             this.glBuffers = buffers;
 
             const renderLoopId = this.renderLoopId;
-            this.squareRotation = 0.0;
 
             function render(now) {
                 if (renderLoopId != app.renderLoopId) {
@@ -220,30 +213,6 @@ class App {
         gl.depthFunc(gl.LEQUAL);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        const fieldOfView = 45 * Math.PI / 180;   // in radians
-        const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-        const zNear = 0.1;
-        const zFar = 100.0;
-        const projectionMatrix = mat4.create();
-
-        // note: glmatrix.js always has the first argument
-        // as the destination to receive the result.
-        mat4.perspective(projectionMatrix,
-            fieldOfView,
-            aspect,
-            zNear,
-            zFar);
-
-        const modelViewMatrix = mat4.create();
-
-        mat4.translate(modelViewMatrix,
-            modelViewMatrix,
-            [-0.0, 0.0, -6.0]);
-        mat4.rotate(modelViewMatrix,
-            modelViewMatrix,
-            this.squareRotation,
-            [0, 0, 1]);
 
         {
             const numComponents = 2;
@@ -283,22 +252,11 @@ class App {
 
         gl.useProgram(programInfo.program);
 
-        gl.uniformMatrix4fv(
-            programInfo.uniformLocations.projectionMatrix,
-            false,
-            projectionMatrix);
-        gl.uniformMatrix4fv(
-            programInfo.uniformLocations.modelViewMatrix,
-            false,
-            modelViewMatrix);
-
         {
             const offset = 0;
             const vertexCount = 4;
             gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
         }
-
-        this.squareRotation += deltaTime;
     }
 
     shaderSourceFromEditor(id: string) {
